@@ -33,3 +33,28 @@ Little RESTful API that exposes NMAP functionalities.
   }
 }
 ```
+
+## Using dedicated client
+
+```golang
+package main
+
+import (
+	"fmt"
+	"github.com/darkspot-org/mri/client"
+	"log"
+)
+
+func main() {
+	c := client.NewClient("http://localhost:8080")
+
+	res, err := c.Scan("1.1.1.1", []int{80, 443})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for port, info := range res.Results {
+		fmt.Printf("%d %v \n", port, info)
+	}
+}
+```

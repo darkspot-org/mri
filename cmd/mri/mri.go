@@ -4,28 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/Ullaakut/nmap/v2"
+	"github.com/darkspot-org/mri/client"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
 )
-
-type Request struct {
-	Host  string `json:"host"`
-	Ports []int  `json:"ports"`
-}
-
-type Scan struct {
-	Params  Request        `json:"request"`
-	Results map[int]Result `json:"results"`
-}
-
-type Result struct {
-	Proto   string `json:"proto"`
-	State   string `json:"state"`
-	Service string `json:"service"`
-	Version string `json:"version"`
-}
 
 func main() {
 	http.HandleFunc("/", handle)
@@ -36,7 +20,7 @@ func main() {
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
-	var request Request
+	var request client.Request
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		log.Printf("error while decoding request body: %s", err)
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -59,7 +43,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	log.Printf("successfully scanned host: %v", request)
 }
 
-func scanHost(req Request) (Scan, error) {
+func scanHost(req client.Request) (client.Scan, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
@@ -76,17 +60,17 @@ func scanHost(req Request) (Scan, error) {
 	)
 
 	if err != nil {
-		return Scan{}, err
+		return client.Scan{}, err
 	}
 
 	res, _, err := scanner.Run()
 	if err != nil {
-		return Scan{}, err
+		return client.Scan{}, err
 	}
 
-	scan := Scan{
+	scan := client.Scan{
 		Params:  req,
-		Results: map[int]Result{},
+		Results: map[int]client.Result{},
 	}
 
 	for _, host := range res.Hosts {
@@ -95,7 +79,7 @@ func scanHost(req Request) (Scan, error) {
 		}
 
 		for _, port := range host.Ports {
-			scan.Results[int(port.ID)] = Result{
+			scan.Results[int(port.ID)] = client.Result{
 				Proto:   port.Protocol,
 				State:   port.State.State,
 				Service: port.Service.Name,
