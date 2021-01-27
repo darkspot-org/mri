@@ -1,6 +1,6 @@
 FROM instrumentisto/nmap:latest
 
 WORKDIR /app
-COPY mri .
+COPY sonar .
 
-ENTRYPOINT ["./mri"]
+ENTRYPOINT ["./sonar"]

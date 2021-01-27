@@ -1,4 +1,4 @@
-# mri
+# Sonar
 
 Little RESTful API that exposes NMAP functionalities.
 
@@ -41,12 +41,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/darkspot-org/mri/client"
+	"github.com/darkspot-org/sonar"
 	"log"
 )
 
 func main() {
-	c := client.NewClient("http://localhost:8080")
+	c := sonar.NewClient("http://localhost:8080")
 
 	res, err := c.Scan("1.1.1.1", []int{80, 443})
 	if err != nil {
